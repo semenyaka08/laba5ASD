@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "VisualGraph/1.0.0": {
+        "dependencies": {
+          "GraphExploring": "1.0.0"
+        },
+        "runtime": {
+          "VisualGraph.dll": {}
+        }
+      },
+      "GraphExploring/1.0.0": {
+        "runtime": {
+          "GraphExploring.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "VisualGraph/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GraphExploring/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
