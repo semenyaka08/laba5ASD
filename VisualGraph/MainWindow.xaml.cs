@@ -1,17 +1,11 @@
-﻿
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-
 using System.Windows.Media;
-
 using System.Windows.Shapes;
 using GraphExploring;
 
 namespace VisualGraph;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow 
 {
     private readonly Graph _graph = new Graph(true);
