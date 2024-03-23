@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GraphExploring\GraphExploring.csproj" />
+      <ProjectReference Include="..\GraphImplementation\GraphImplementation.csproj" />
     </ItemGroup>
 
 </Project>

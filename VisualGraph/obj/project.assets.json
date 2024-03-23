@@ -2,28 +2,28 @@
   "version": 3,
   "targets": {
     "net8.0-windows7.0": {
-      "GraphExploring/1.0.0": {
+      "GraphImplementation/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "compile": {
-          "bin/placeholder/GraphExploring.dll": {}
+          "bin/placeholder/GraphImplementation.dll": {}
         },
         "runtime": {
-          "bin/placeholder/GraphExploring.dll": {}
+          "bin/placeholder/GraphImplementation.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "GraphExploring/1.0.0": {
+    "GraphImplementation/1.0.0": {
       "type": "project",
-      "path": "../GraphExploring/GraphExploring.csproj",
-      "msbuildProject": "../GraphExploring/GraphExploring.csproj"
+      "path": "../GraphImplementation/GraphImplementation.csproj",
+      "msbuildProject": "../GraphImplementation/GraphImplementation.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
-      "GraphExploring >= 1.0.0"
+      "GraphImplementation >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -58,8 +58,8 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "E:\\CodeInRider\\GraphExploring\\GraphExploring\\GraphExploring.csproj": {
-              "projectPath": "E:\\CodeInRider\\GraphExploring\\GraphExploring\\GraphExploring.csproj"
+            "E:\\CodeInRider\\GraphExploring\\GraphImplementation\\GraphImplementation.csproj": {
+              "projectPath": "E:\\CodeInRider\\GraphExploring\\GraphImplementation\\GraphImplementation.csproj"
             }
           }
         }
