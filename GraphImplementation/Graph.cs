@@ -73,7 +73,7 @@ public class Graph
         int[,] adjacencyMatrix = new int[n, n];
         Random rnd = new Random(variant);
         
-        double k = 1.0 - 2 * 0.02 - 1 * 0.005 * 0.25;
+        double k = 1.0 - 2 * 0.02 - 1 * 0.005 - 0.25;
         
         for (int i = 0; i < n; i++)
         {
