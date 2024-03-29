@@ -39,7 +39,6 @@ public partial class MainWindow
             foreach (var edge in vertex.Edges)
             {
                 DrawEdge(edge, dictionary);
-                
             }
         }
     }
@@ -64,7 +63,7 @@ public partial class MainWindow
         for (int i = 0; i < _graph.Vertices.Count; i++)
         {
             double angle = i * angleIncrement;
-            double angleRad = angle * Math.PI / 180; // Угол в радианах
+            double angleRad = angle * Math.PI / 180; 
 
             double x = centreX + radius * Math.Cos(angleRad);
             double y = centreY + radius * Math.Sin(angleRad);
@@ -126,29 +125,76 @@ public partial class MainWindow
         double lineLength = Math.Sqrt(Math.Pow((dictionary[edge.To].X - dictionary[edge.From].X), 2) +
                                       Math.Pow(dictionary[edge.To].Y - dictionary[edge.From].Y, 2));
         double k = 15 / lineLength;
-        
-        var line = new Line
-        {
-            X1 = dictionary[edge.From].X + k*(dictionary[edge.To].X - dictionary[edge.From].X),
-            Y1 = dictionary[edge.From].Y + k*(dictionary[edge.To].Y - dictionary[edge.From].Y),
-            X2 = dictionary[edge.To].X + k*(dictionary[edge.From].X - dictionary[edge.To].X),
-            Y2 = dictionary[edge.To].Y + k*(dictionary[edge.From].Y - dictionary[edge.To].Y),
-            Stroke = Brushes.Black,
-            StrokeThickness = 2
-        };
 
-        Canvas.Children.Add(line);
+        
+        if (_graph.IsDirected && _graph.Edges.Any( z => z.To == edge.From && z.From == edge.To))
+        {
+                Path path = new Path();
+                path.Stroke = Brushes.Black;
+                path.StrokeThickness = 2;
+                Point startPoint = new Point(dictionary[edge.From].X + k*(dictionary[edge.To].X - dictionary[edge.From].X), dictionary[edge.From].Y + k*(dictionary[edge.To].Y - dictionary[edge.From].Y));
+                Point endPoint = new Point(dictionary[edge.To].X + k*(dictionary[edge.From].X - dictionary[edge.To].X), dictionary[edge.To].Y + k*(dictionary[edge.From].Y - dictionary[edge.To].Y));
+                Point center = new Point((startPoint.X + endPoint.X)/2, (startPoint.Y + endPoint.Y)/2);
+                double dx = endPoint.X - startPoint.X;
+                double dy = startPoint.Y - endPoint.Y;
+                double length = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+                double xGrow = dx / length;
+                double yGrow = dy / length;
+                
+                Point middlePoint = new Point(center.X - (50 * yGrow), center.Y - (50*xGrow));
+                
+                PathGeometry pathGeometry = new PathGeometry();
+                
+                PathFigure pathFigure = new PathFigure();
+                
+                pathFigure.StartPoint = startPoint; 
+            
+                BezierSegment bezierSegment = new BezierSegment(
+                    startPoint,
+                    middlePoint,
+                    endPoint,
+                    true);
+                
+                pathFigure.Segments.Add(bezierSegment);
+                pathGeometry.Figures.Add(pathFigure);
+                path.Data = pathGeometry;
+                Canvas.Children.Add(path);
+        }
+
+        else
+        {
+            var line = new Line
+            {
+                X1 = dictionary[edge.From].X + k * (dictionary[edge.To].X - dictionary[edge.From].X),
+                Y1 = dictionary[edge.From].Y + k * (dictionary[edge.To].Y - dictionary[edge.From].Y),
+                X2 = dictionary[edge.To].X + k * (dictionary[edge.From].X - dictionary[edge.To].X),
+                Y2 = dictionary[edge.To].Y + k * (dictionary[edge.From].Y - dictionary[edge.To].Y),
+                Stroke = Brushes.Black,
+                StrokeThickness = 2
+            };
+
+            Canvas.Children.Add(line);
+        }
 
         if (_graph.IsDirected)
         {
-            double angle = Math.Atan2(line.Y2 - line.Y1, line.X2 - line.X1) * (180 / Math.PI);
+            double y2 = dictionary[edge.To].Y + k * (dictionary[edge.From].Y - dictionary[edge.To].Y);
+            double y1 = dictionary[edge.From].Y + k * (dictionary[edge.To].Y - dictionary[edge.From].Y);
+            double x1 = dictionary[edge.From].X + k * (dictionary[edge.To].X - dictionary[edge.From].X);
+            double x2 = dictionary[edge.To].X + k * (dictionary[edge.From].X - dictionary[edge.To].X);
+            
+            double angle = Math.Atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+            if (_graph.IsDirected && _graph.Edges.Any(z => z.To == edge.From && z.From == edge.To))
+            {
+                angle -= 15;
+            }
             
             Polygon arrowhead = new Polygon
             {
-                Points = new PointCollection { new Point(line.X2, line.Y2), new Point(line.X2 - 10, line.Y2 - 5), new Point(line.X2 - 10, line.Y2 + 5) }, // Треугольник
+                Points = new PointCollection { new Point(x2, y2), new Point(x2 - 10, y2 - 5), new Point(x2 - 10, y2 + 5) }, // Треугольник
                 Fill = Brushes.Black, 
                 StrokeThickness = 0,
-                RenderTransform = new RotateTransform(angle, line.X2, line.Y2)
+                RenderTransform = new RotateTransform(angle, x2, y2)
             };
 
             Canvas.Children.Add(arrowhead);

@@ -12,6 +12,7 @@ public class Vertex
 
     private static int _id = 1;
     public int Value { get; set; }
-
+    
+    
     public List<Edge> Edges = new List<Edge>();
 }
