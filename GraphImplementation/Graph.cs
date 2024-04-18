@@ -35,8 +35,6 @@ public class Graph
 
     private void DfsSearchRecur(Vertex  vertex, Dictionary<Vertex, bool> visited)
     {
-        Console.ReadKey();
-        Console.WriteLine(vertex.Value);
         visited.Add(vertex, true);
         foreach (var t in vertex.Edges)
         {
@@ -45,6 +43,9 @@ public class Graph
             DfsSearchRecur(t.To, visited);
         }
     }
+    
+    
+    
     public void AddVertex(int value)
     {
         Vertex newVertex = new Vertex(value);

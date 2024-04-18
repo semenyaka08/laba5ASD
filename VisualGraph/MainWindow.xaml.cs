@@ -16,7 +16,6 @@ public partial class MainWindow
     private readonly Dictionary<(Vertex, Vertex), Line> _drawnLines = new Dictionary<(Vertex,Vertex), Line>();
     
     private readonly Dictionary<(Vertex, Vertex), Path> _drawnCurves = new Dictionary<(Vertex,Vertex), Path>();
-
     
     private bool _flag = false;
     
@@ -52,7 +51,7 @@ public partial class MainWindow
 
         var startDfsButton = new Button
         {
-            Content = "StartDfsButton",
+            Content = "StartDfs",
             Width = 115,
             Height = 50,
         };
@@ -62,15 +61,34 @@ public partial class MainWindow
             Width = 115,
             Height = 50,
         };
+        var startBfsButton = new Button
+        {
+            Content = "StartBfs",
+            Width = 115,
+            Height = 50,
+        };
+        
         startDfsButton.Click += StartDFSButton_Click;
         nextStepButton.Click += NextStepButton_Click;
-        Canvas.SetLeft(nextStepButton, 50);
-        Canvas.SetTop(nextStepButton, 140);
+        startBfsButton.Click += StartBFSButton_Click;
         Canvas.SetLeft(startDfsButton, 50);
         Canvas.SetTop(startDfsButton, 50);
+        
+        Canvas.SetLeft(nextStepButton, 50);
+        Canvas.SetTop(nextStepButton, 120);
+        
+        Canvas.SetLeft(startBfsButton, 50);
+        Canvas.SetTop(startBfsButton, 190);
+        
         Canvas.Children.Add(startDfsButton);
         Canvas.Children.Add(nextStepButton);
-        
+        Canvas.Children.Add(startBfsButton);
+
+    }
+    
+    private async void StartBFSButton_Click(object sender, RoutedEventArgs e)
+    {
+        await Task.Run(BfsAlgorithm);
     }
     
     private void UpdateCircleColor(Vertex vertex, Brush color)
@@ -80,6 +98,7 @@ public partial class MainWindow
             _drawnCircles[vertex.CurrentId].Fill = color;
         });
     }
+    
     private void UpdateLineColor((Vertex,Vertex) edge, Brush color)
     {
         Dispatcher.Invoke(() =>
@@ -87,6 +106,11 @@ public partial class MainWindow
             try
             {
                 _drawnLines[edge].Stroke = color;
+                if (!_graph.IsDirected)
+                {
+                    (Vertex, Vertex) edge2 = (edge.Item2, edge.Item1);
+                    _drawnLines[edge2].Stroke = color;
+                }
             }
             catch (Exception e)
             {
@@ -99,17 +123,19 @@ public partial class MainWindow
     {
         await Task.Run(() => DfsSearch(_graph.Vertices[0]));
     }
+    
     private void NextStepButton_Click(object sender, RoutedEventArgs e)
     {
         _flag = true;
     }
-    public void DfsSearch(Vertex startVertex)
+    
+    private void DfsSearch(Vertex startVertex)
     {
         var edge = default((Vertex, Vertex));
         var visited = new Dictionary<Vertex, bool>();
         DfsSearchRecur(startVertex, visited, edge);
     }
-
+    
     private void DfsSearchRecur(Vertex  vertex, Dictionary<Vertex, bool> visited, (Vertex,Vertex) edge)
     {
         edge.Item1 = vertex;
@@ -130,11 +156,35 @@ public partial class MainWindow
             DfsSearchRecur(t.To, visited, edge);
         }
     }
-    
-    
-    
-    
-    
+
+    private void BfsAlgorithm()
+    {
+        var visited = new Dictionary<Vertex, bool>();
+        var children = new Queue<Vertex>();
+        var startVertex = _graph.Vertices.First(p => p.CurrentId == 7);
+        UpdateCircleColor(startVertex, Brushes.Green);
+        children.Enqueue(startVertex);
+        visited[startVertex] = true;
+        while (children.Count != 0)
+        {
+            var vertex = children.Dequeue();
+            foreach (var item in vertex.Edges)
+            {
+                if (!visited.ContainsKey(item.To))
+                {
+                    while (true)
+                    {
+                        if(_flag) break;
+                    }
+                    _flag = false;
+                    UpdateCircleColor(item.To, Brushes.Green);
+                    UpdateLineColor((vertex, item.To), Brushes.Red);
+                    children.Enqueue(item.To);
+                    visited[item.To] = true;
+                }
+            }
+        }
+    }
     
     private void ArrangeVerticesInCircle(double centreX,double centreY,int radius, Dictionary<Vertex, Coordinates> dictionary)
     {
@@ -281,8 +331,6 @@ public partial class MainWindow
             Canvas.Children.Add(arrowhead);
         }
     }
-    
-    
 }
 
 public struct Coordinates
