@@ -26,7 +26,25 @@ public class Graph
         
         return matrix;
     }
-    
+
+    public void DfsSearch(Vertex startVertex)
+    {
+        var visited = new Dictionary<Vertex, bool>();
+        DfsSearchRecur(startVertex, visited);
+    }
+
+    private void DfsSearchRecur(Vertex  vertex, Dictionary<Vertex, bool> visited)
+    {
+        Console.ReadKey();
+        Console.WriteLine(vertex.Value);
+        visited.Add(vertex, true);
+        foreach (var t in vertex.Edges)
+        {
+            if (visited.ContainsKey(t.To))
+                continue;
+            DfsSearchRecur(t.To, visited);
+        }
+    }
     public void AddVertex(int value)
     {
         Vertex newVertex = new Vertex(value);
@@ -73,7 +91,7 @@ public class Graph
         int[,] adjacencyMatrix = new int[n, n];
         Random rnd = new Random(variant);
         
-        double k = 1.0 - 2 * 0.02 - 1 * 0.005 - 0.25;
+        double k = 1.0 - 2 * 0.01 - 1 * 0.005 - 0.15;
         
         for (int i = 0; i < n; i++)
         {
