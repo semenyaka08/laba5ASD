@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using GraphExploring;
-using System.Threading.Tasks;
 
 namespace VisualGraph;
 
@@ -16,6 +15,12 @@ public partial class MainWindow
     private readonly Dictionary<(Vertex, Vertex), Line> _drawnLines = new Dictionary<(Vertex,Vertex), Line>();
     
     private readonly Dictionary<(Vertex, Vertex), Path> _drawnCurves = new Dictionary<(Vertex,Vertex), Path>();
+
+    private readonly Dictionary<(Vertex, Vertex), Polygon> _drawnArrows = new Dictionary<(Vertex,Vertex), Polygon>();
+    
+    private readonly LinkedList<Vertex> _vector = new LinkedList<Vertex>();
+
+    private readonly int[,] _matrix = new int[12,12];
     
     private bool _flag = false;
     
@@ -36,7 +41,7 @@ public partial class MainWindow
         _graph.AddVertex(12);
         
         _graph.GenerateMatrix();
-        
+        DisplayMatrix(_graph);
         var dictionary = new Dictionary<Vertex, Coordinates>();
         
         ArrangeVerticesInCircle(683, 352, 300, dictionary);
@@ -55,12 +60,7 @@ public partial class MainWindow
             Width = 115,
             Height = 50,
         };
-        var nextStepButton = new Button
-        {
-            Content = "NextStepDFS",
-            Width = 115,
-            Height = 50,
-        };
+        
         var startBfsButton = new Button
         {
             Content = "StartBfs",
@@ -69,26 +69,72 @@ public partial class MainWindow
         };
         
         startDfsButton.Click += StartDFSButton_Click;
-        nextStepButton.Click += NextStepButton_Click;
         startBfsButton.Click += StartBFSButton_Click;
+        
         Canvas.SetLeft(startDfsButton, 50);
         Canvas.SetTop(startDfsButton, 50);
-        
-        Canvas.SetLeft(nextStepButton, 50);
-        Canvas.SetTop(nextStepButton, 120);
         
         Canvas.SetLeft(startBfsButton, 50);
         Canvas.SetTop(startBfsButton, 190);
         
         Canvas.Children.Add(startDfsButton);
-        Canvas.Children.Add(nextStepButton);
         Canvas.Children.Add(startBfsButton);
 
+    }
+    private void DisplayMatrix(Graph graph)
+    {
+        var matrix = graph.GetMatrix();
+        
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                Console.Write(matrix[i, j] + "  ");
+            }
+            Console.WriteLine();
+        }
     }
     
     private async void StartBFSButton_Click(object sender, RoutedEventArgs e)
     {
+        Canvas.Children.RemoveRange(131, 132);
+        var nextStepButton = new Button
+        {
+            Content = "NextStep",
+            Width = 115,
+            Height = 50,
+        };
+        nextStepButton.Click += NextStepButton_Click;
+        Canvas.SetLeft(nextStepButton, 50);
+        Canvas.SetTop(nextStepButton, 120);
+        Canvas.Children.Add(nextStepButton);
+        
         await Task.Run(BfsAlgorithm);
+        
+        Console.WriteLine("\n Вектор відповідності \n");
+
+        LinkedListNode<Vertex>? currentNode = _vector.First;
+        while (currentNode != null)
+        {
+            if(currentNode.Next == null)  
+                Console.Write(currentNode.Value.Value );
+            else
+                Console.Write(currentNode.Value.Value + "-");
+            
+            currentNode = currentNode.Next;
+        }
+        
+        Console.WriteLine("\n Матриця суміжності дерева обходу \n");
+
+        
+        for (int i = 0; i < _matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < _matrix.GetLength(1); j++)
+            {
+                Console.Write(_matrix[i, j] + " ");
+            }
+            Console.WriteLine(); 
+        }
     }
     
     private void UpdateCircleColor(Vertex vertex, Brush color)
@@ -116,12 +162,51 @@ public partial class MainWindow
             {
                 _drawnCurves[edge].Stroke = color;
             }
+
+            _drawnArrows[edge].Fill = color;
         });
     }
     
     private async void StartDFSButton_Click(object sender, RoutedEventArgs e)
     {
+        Canvas.Children.RemoveRange(131, 132);
+        var nextStepButton = new Button
+        {
+            Content = "NextStep",
+            Width = 115,
+            Height = 50,
+        };
+        nextStepButton.Click += NextStepButton_Click;
+        Canvas.SetLeft(nextStepButton, 50);
+        Canvas.SetTop(nextStepButton, 120);
+        Canvas.Children.Add(nextStepButton);
+
         await Task.Run(() => DfsSearch(_graph.Vertices[0]));
+        
+        Console.WriteLine("\n Вектор відповідності \n");
+        
+        LinkedListNode<Vertex>? currentNode = _vector.First;
+        while (currentNode != null)
+        {
+            if(currentNode.Next == null)  
+                Console.Write(currentNode.Value.Value );
+            else
+                Console.Write(currentNode.Value.Value + "-");
+            
+            currentNode = currentNode.Next;
+        }
+        
+        Console.WriteLine("\n Матриця суміжності дерева обходу \n");
+
+        
+        for (int i = 0; i < _matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < _matrix.GetLength(1); j++)
+            {
+                Console.Write(_matrix[i, j] + " ");
+            }
+            Console.WriteLine(); 
+        }
     }
     
     private void NextStepButton_Click(object sender, RoutedEventArgs e)
@@ -133,13 +218,13 @@ public partial class MainWindow
     {
         var edge = default((Vertex, Vertex));
         var visited = new Dictionary<Vertex, bool>();
+        _vector.AddLast(startVertex);
         DfsSearchRecur(startVertex, visited, edge);
     }
     
     private void DfsSearchRecur(Vertex  vertex, Dictionary<Vertex, bool> visited, (Vertex,Vertex) edge)
     {
         edge.Item1 = vertex;
-        Console.WriteLine(vertex.Value);
         UpdateCircleColor(vertex, Brushes.Green);
         while (true)
         {
@@ -153,6 +238,8 @@ public partial class MainWindow
                 continue;
             edge.Item2 = t.To;
             UpdateLineColor(edge, Brushes.Red);
+            _vector.AddLast(t.To);
+            _matrix[vertex.CurrentId - 1, t.To.CurrentId - 1] = 1;
             DfsSearchRecur(t.To, visited, edge);
         }
     }
@@ -161,7 +248,8 @@ public partial class MainWindow
     {
         var visited = new Dictionary<Vertex, bool>();
         var children = new Queue<Vertex>();
-        var startVertex = _graph.Vertices.First(p => p.CurrentId == 7);
+        var startVertex = _graph.Vertices.First(p => p.CurrentId == 1);
+        _vector.AddLast(startVertex);
         UpdateCircleColor(startVertex, Brushes.Green);
         children.Enqueue(startVertex);
         visited[startVertex] = true;
@@ -179,6 +267,8 @@ public partial class MainWindow
                     _flag = false;
                     UpdateCircleColor(item.To, Brushes.Green);
                     UpdateLineColor((vertex, item.To), Brushes.Red);
+                    _vector.AddLast(item.To);
+                    _matrix[vertex.CurrentId - 1, item.To.CurrentId - 1] = 1;
                     children.Enqueue(item.To);
                     visited[item.To] = true;
                 }
@@ -327,7 +417,9 @@ public partial class MainWindow
                 StrokeThickness = 0,
                 RenderTransform = new RotateTransform(angle, x2, y2)
             };
-
+            
+            _drawnArrows.Add((edge.From, edge.To),arrowhead);
+            
             Canvas.Children.Add(arrowhead);
         }
     }
